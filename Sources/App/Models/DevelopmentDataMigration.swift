@@ -5,11 +5,12 @@
 //  Created by Clément NONN on 09/03/2019.
 //
 
-import FluentSQLite
+import FluentMySQL
 import Crypto
 
-struct DevelopmentDataMigration: SQLiteMigration {
-    static func prepare(on conn: SQLiteConnection) -> EventLoopFuture<Void> {
+
+struct DevelopmentDataMigration: MySQLMigration {
+    static func prepare(on conn: MySQLConnection) -> EventLoopFuture<Void> {
         do {
             let hashedPassword = try BCrypt.hash("test")
             return User(username: "zarghol", passwordHash: hashedPassword).create(on: conn).flatMap {
@@ -24,7 +25,7 @@ struct DevelopmentDataMigration: SQLiteMigration {
         }
     }
 
-    static func revert(on conn: SQLiteConnection) -> EventLoopFuture<Void> {
+    static func revert(on conn: MySQLConnection) -> EventLoopFuture<Void> {
         return User.query(on: conn).filter(\User.username == "zarghol").all().map {
             try $0.forEach {
                 try $0.tokens.query(on: conn).delete().wait()

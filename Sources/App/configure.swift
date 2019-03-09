@@ -1,4 +1,4 @@
-import FluentSQLite
+import FluentMySQL
 import Vapor
 import Authentication
 import Crypto
@@ -6,7 +6,7 @@ import Crypto
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
     // Register providers first
-    try services.register(FluentSQLiteProvider())
+    try services.register(FluentMySQLProvider())
     try services.register(AuthenticationProvider())
 
     // Register routes to the router
@@ -22,21 +22,31 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
 
-    // Configure a SQLite database
-    let sqlite = try SQLiteDatabase(storage: .memory)
+    guard let hostname = Environment.get("hostname"),
+        let portString = Environment.get("port"),
+        let port = Int(portString),
+        let username = Environment.get("username"),
+        let password = Environment.get("password"),
+        let database = Environment.get("database") else { throw Abort(.internalServerError) }
+
+    let mysqlConfig = MySQLDatabaseConfig(hostname: hostname, port: port, username: username, password: password, database: database)
+
+    // Configure a MySQL database
+
+    let mysql = MySQLDatabase(config: mysqlConfig)
 
     // Register the configured SQLite database to the database config.
     var databases = DatabasesConfig()
-    databases.add(database: sqlite, as: .sqlite)
+    databases.add(database: mysql, as: .mysql)
     services.register(databases)
 
     // Configure migrations
     var migrations = MigrationConfig()
-    migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: UserToken.self, database: .sqlite)
-    migrations.add(model: Meeting.self, database: .sqlite)
+    migrations.add(model: User.self, database: .mysql)
+    migrations.add(model: UserToken.self, database: .mysql)
+    migrations.add(model: Meeting.self, database: .mysql)
     if env == .development {
-        migrations.add(migration: DevelopmentDataMigration.self, database: .sqlite)
+        migrations.add(migration: DevelopmentDataMigration.self, database: .mysql)
     }
 
     services.register(migrations)

@@ -5,11 +5,11 @@
 //  Created by Clément NONN on 08/03/2019.
 //
 
-import FluentSQLite
+import FluentMySQL
 import Foundation
 import Vapor
 
-struct Meeting: SQLiteModel {
+struct Meeting: MySQLModel {
     /// The unique identifier for this `meeting`.
     var id: Int?
 

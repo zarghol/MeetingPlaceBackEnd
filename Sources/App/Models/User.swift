@@ -5,11 +5,11 @@
 //  Created by Clément NONN on 08/03/2019.
 //
 
-import FluentSQLite
+import FluentMySQL
 import Vapor
 import Authentication
 
-struct User: SQLiteModel {
+struct User: MySQLModel {
     var id: Int?
 
     var username: String
