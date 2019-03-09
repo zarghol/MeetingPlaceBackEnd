@@ -7,8 +7,7 @@
 
 import Vapor
 
-struct UserRequest {
+struct UserRequest: Content {
     let user: String
     let password: String
 }
-extension UserRequest: Content { }

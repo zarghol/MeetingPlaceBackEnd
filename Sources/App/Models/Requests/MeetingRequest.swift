@@ -7,12 +7,10 @@
 
 import Vapor
 
-struct MeetingRequest {
+struct MeetingRequest: Content {
     let title: String
     let date: Date
-}
 
-extension MeetingRequest: Content {
     static let dateFormatter: DateFormatter = {
         let fo = DateFormatter()
         fo.dateFormat = "dd'-'MM'-'yyyy"
