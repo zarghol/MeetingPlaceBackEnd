@@ -11,6 +11,8 @@ struct MeetingRequest: Content {
     let title: String
     let date: Date
 
+    let username: String?
+
     static let dateFormatter: DateFormatter = {
         let fo = DateFormatter()
         fo.dateFormat = "dd'-'MM'-'yyyy"

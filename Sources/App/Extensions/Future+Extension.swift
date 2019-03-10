@@ -8,21 +8,21 @@
 import Async
 
 extension Future {
-    func `guard`(throwing error: Error, condition: @escaping (T) -> Bool) -> Future<T> {
+    func `guard`(throwing error: Error, condition: @escaping (T) throws -> Bool) -> Future<T> {
         return self.map {
-            guard condition($0) else {
+            guard try condition($0) else {
                 throw error
             }
             return $0
         }
     }
 
-    func with<U>(_ mapping: @escaping (T) -> U) -> Future<(T, U)> {
-        return self.map { ($0, mapping($0)) }
+    func with<U>(_ mapping: @escaping (T) throws -> U) -> Future<(T, U)> {
+        return self.map { ($0, try mapping($0)) }
     }
 
-    func with<U>(_ mapping: @escaping (T) -> Future<U>) -> Future<(T, U)> {
-        return self.flatMap { first in mapping(first).map { (first, $0) } }
+    func with<U>(_ mapping: @escaping (T) throws -> Future<U>) -> Future<(T, U)> {
+        return self.flatMap { first in try mapping(first).map { (first, $0) } }
     }
 
     func verifyMapping<U>(_ mapping: @escaping (T) -> U, throwing error: Error, condition: @escaping (U) -> Bool) -> Future<T> {

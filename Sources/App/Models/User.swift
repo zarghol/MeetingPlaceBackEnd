@@ -14,11 +14,13 @@ struct User: MySQLModel {
 
     var username: String
     var passwordHash: String
+    var permissions: PermissionLevel
 
-    init(id: Int? = nil, username: String, passwordHash: String) {
+    init(id: Int? = nil, username: String, passwordHash: String, permissions: PermissionLevel = .teamMember) {
         self.id = id
         self.username = username
         self.passwordHash = passwordHash
+        self.permissions = permissions
     }
 
     var meetings: Children<User, Meeting> {

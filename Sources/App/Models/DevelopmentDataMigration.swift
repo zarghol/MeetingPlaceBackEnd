@@ -8,12 +8,11 @@
 import FluentMySQL
 import Crypto
 
-
 struct DevelopmentDataMigration: MySQLMigration {
     static func prepare(on conn: MySQLConnection) -> EventLoopFuture<Void> {
         do {
             let hashedPassword = try BCrypt.hash("test")
-            return User(username: "zarghol", passwordHash: hashedPassword).create(on: conn).flatMap {
+            return User(username: "zarghol", passwordHash: hashedPassword, permissions: .admin).create(on: conn).flatMap {
                 UserToken.create(forUser: $0.id!).create(on: conn)
             }.map {
                 print("dev token : \($0.string)")
@@ -34,6 +33,4 @@ struct DevelopmentDataMigration: MySQLMigration {
             }
         }
     }
-
-
 }

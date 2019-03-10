@@ -10,10 +10,6 @@ import Vapor
 
 extension Request {
     func requestUserId() throws -> Int {
-        let user = try self.requireAuthenticated(User.self)
-        guard let userId = user.id else {
-            throw BasicValidationError("Unknown user")
-        }
-        return userId
+        return try self.requireAuthenticated(User.self).requireID()
     }
 }
