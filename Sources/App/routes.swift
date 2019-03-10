@@ -9,6 +9,7 @@ public func routes(_ router: Router) throws {
         return "It works!"
     }
 
+    // User routes
     let userController = UserController()
 
     router.get("users", use: userController.allUsernames)
@@ -21,14 +22,16 @@ public func routes(_ router: Router) throws {
 
     tokenManagementRoute.post(use: userController.createToken)
     tokenManagementRoute.get(use: userController.allTokens)
-    tokenManagementRoute.delete(use: userController.deleteToken)
+    tokenManagementRoute.delete(String.parameter, use: userController.deleteToken)
 
     let tokenAuth = User.tokenAuthMiddleware()
     userRoute.grouped(tokenAuth).delete(use: userController.delete)
 
-    let guardAuth = User.guardAuthMiddleware()
     let unprotectedMeetingRoute = router.grouped("meeting")
+    let guardAuth = User.guardAuthMiddleware()
     let meetingProtectedRoute = unprotectedMeetingRoute.grouped([tokenAuth, guardAuth])
+
+    // Meeting routes
     let meetingController = MeetingController()
 
     meetingProtectedRoute.post(use: meetingController.create())
@@ -39,6 +42,4 @@ public func routes(_ router: Router) throws {
     unprotectedMeetingRoute.get("all", use: meetingController.all)
     unprotectedMeetingRoute.get("day", String.parameter, use: meetingController.oneDay)
     unprotectedMeetingRoute.get(Int.parameter, use: meetingController.one)
-    
-    
 }

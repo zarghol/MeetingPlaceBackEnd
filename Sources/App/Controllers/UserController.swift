@@ -26,10 +26,7 @@ final class UserController {
 
     // protected by password
     func createToken(_ req: Request) throws -> Future<String> {
-        let user = try req.requireAuthenticated(User.self)
-        guard let userId = user.id else {
-            throw BasicValidationError("Unknown user")
-        }
+        let userId = try req.requestUserId()
 
         return UserToken
             .create(forUser: userId)
@@ -47,13 +44,26 @@ final class UserController {
     }
 
     // protected by password
-    func deleteToken(_ req: Request) -> HTTPStatus {
-        return .notImplemented
+    func deleteToken(_ req: Request) throws -> Future<HTTPStatus> {
+        let userId = try req.requestUserId()
+        let token = try req.parameters.next(String.self)
+
+        return UserToken.query(on: req)
+            .filter(\UserToken.string, .equal, token)
+            .filter(\UserToken.userID, .equal, userId)
+            .delete()
+            .transform(to: .ok)
     }
 
     // protected by token
-    func delete(_ req: Request) -> HTTPStatus {
-        return .notImplemented
+    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try req.requireAuthenticated(User.self)
+
+        return req.transaction(on: .mysql) { conn in
+            return [try user.tokens.query(on: conn).delete(),
+                    try user.meetings.query(on: conn).delete(),
+                    user.delete(on: conn)].chained()!
+        }.transform(to: .ok)
     }
 
     // not protected
