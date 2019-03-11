@@ -8,6 +8,8 @@
 import Foundation
 import Vapor
 
+
+
 final class MeetingController {
     func create(withId meetingId: Int? = nil) -> ((_ req: Request) throws -> Future<HTTPResponse>) {
         return { req in
@@ -43,35 +45,39 @@ final class MeetingController {
         }
     }
 
-    func mine(_ req: Request) throws -> Future<[Meeting]> {
+    func mine(_ req: Request) throws -> Future<[PublicMeeting]> {
         let user = try req.requireAuthenticated(User.self)
 
         return try user
             .meetings
             .query(on: req)
             .all()
+            .makePublic(with: req)
     }
 
-    func all(_ req: Request) -> Future<[Meeting]> {
+    func all(_ req: Request) -> Future<[PublicMeeting]> {
         return Meeting
             .query(on: req)
             .all()
+            .flatMap { try $0.makePublic(with: req) }
     }
 
-    func oneDay(_ req: Request) throws -> Future<[Meeting]> {
+    func oneDay(_ req: Request) throws -> Future<[PublicMeeting]> {
         let date = try req.parameters.next(String.self)
         return Meeting
             .query(on: req)
             .filter(\.presentationDate, .equal, date)
             .all()
+            .makePublic(with: req)
     }
 
-    func one(_ req: Request) throws -> Future<Meeting> {
+    func one(_ req: Request) throws -> Future<PublicMeeting> {
         let id = try req.parameters.next(Int.self)
 
         return Meeting
             .find(id, on: req)
             .unwrap(or: BasicValidationError("No meeting found for this id"))
+            .makePublic(with: req)
     }
 
     func edit(_ req: Request) throws -> Future<HTTPResponse> {

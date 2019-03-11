@@ -36,4 +36,10 @@ struct Meeting: MySQLModel {
 
 extension Meeting: Migration { }
 
-extension Meeting: Content { }
+extension Meeting: PublicEntityConvertible {
+    func makePublic(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicMeeting> {
+        return self.user.get(on: container).map {
+            return PublicMeeting(title: self.title, presentationDate: self.presentationDate, presenter: $0.username)
+        }
+    }
+}

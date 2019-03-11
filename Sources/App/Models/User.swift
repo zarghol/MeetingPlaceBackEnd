@@ -49,6 +49,10 @@ extension User: TokenAuthenticatable {
     typealias TokenType = UserToken
 }
 
-extension User: Content { }
-
 extension User: Migration { }
+
+extension User: PublicEntityConvertible {
+    func makePublic(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicUser> {
+        return container.future(PublicUser(username: self.username)) 
+    }
+}

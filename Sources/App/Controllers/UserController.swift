@@ -9,38 +9,38 @@ import Vapor
 import Crypto
 
 final class UserController {
-    func create(_ req: Request) throws -> Future<User> {
+    func create(_ req: Request) throws -> Future<PublicUser> {
         let userRequest = try req.content.decode(UserRequest.self)
 
         let existingUserError = BasicValidationError("a user with this name already exist. Couldn't create new user with this name")
 
         return userRequest.verifyMapping({
-            return User.query(on: req) .filter(\User.username, .equal, $0.user).first()
+            return User.query(on: req).filter(\User.username, .equal, $0.user).first()
         }, throwing: existingUserError, condition: { $0 == nil })
         .flatMap { request in
             let passwordHashed = try BCrypt.hash(request.password)
             let created = User(username: request.user, passwordHash: passwordHashed)
-            return created.create(on: req)
+            return created.create(on: req).flatMap { try $0.makePublic(with: req) }
         }
     }
 
     // protected by password
-    func createToken(_ req: Request) throws -> Future<String> {
+    func createToken(_ req: Request) throws -> Future<PublicToken> {
         let userId = try req.requestUserId()
 
         return UserToken
             .create(forUser: userId)
             .create(on: req)
-            .map { $0.string }
+            .makePublic(with: req)
     }
 
-    func allTokens(_ req: Request) throws -> Future<[String]> {
+    func allTokens(_ req: Request) throws -> Future<[PublicToken]> {
         let user = try req.requireAuthenticated(User.self)
 
         return try user.tokens
             .query(on: req)
             .all()
-            .map { $0.map { $0.string }}
+            .makePublic(with: req)
     }
 
     // protected by password
@@ -67,7 +67,9 @@ final class UserController {
     }
 
     // not protected
-    func allUsernames(_ req: Request) -> Future<[String]> {
-        return User.query(on: req).all().map { $0.map { $0.username } }
+    func allUsernames(_ req: Request) -> Future<[PublicUser]> {
+        return User.query(on: req)
+            .all()
+            .makePublic(with: req)
     }
 }

@@ -45,4 +45,10 @@ extension UserToken: Token {
     }
 }
 
+extension UserToken: PublicEntityConvertible {
+    func makePublic(with container: DatabaseConnectable & Container) throws -> EventLoopFuture<PublicToken> {
+        return container.future(PublicToken(token: self.string)) 
+    }
+}
+
 extension UserToken: Migration { }
