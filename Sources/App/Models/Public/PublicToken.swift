@@ -7,7 +7,7 @@
 
 import Vapor
 
-struct PublicToken {
+struct PublicToken: Codable {
     var token: String
 }
 

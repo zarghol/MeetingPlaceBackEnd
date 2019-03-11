@@ -7,7 +7,7 @@
 
 import Vapor
 
-struct PublicUser {
+struct PublicUser: Codable {
     var username: String
 }
 

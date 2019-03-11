@@ -1,5 +1,5 @@
 //
-//  MeetingRequest.swift
+//  TalkRequest.swift
 //  App
 //
 //  Created by Clément NONN on 09/03/2019.
@@ -7,7 +7,7 @@
 
 import Vapor
 
-struct MeetingRequest: Content {
+struct TalkRequest: Content {
     let title: String
     let date: Date
 
@@ -34,23 +34,23 @@ struct MeetingRequest: Content {
 
     public func encode(using container: Container) throws -> Future<Request> {
         let req = Request(using: container)
-        try req.content.encode(json: self, using: MeetingRequest.encoder)
+        try req.content.encode(json: self, using: TalkRequest.encoder)
         return Future.map(on: container) { req }
     }
 
     public func encode(for req: Request) throws -> Future<Response> {
         let res = req.response()
-        try res.content.encode(json: self, using: MeetingRequest.encoder)
+        try res.content.encode(json: self, using: TalkRequest.encoder)
         return Future.map(on: req) { res }
     }
 
-    public static func decode(from req: Request) throws -> Future<MeetingRequest> {
-        let content = try req.content.decode(json: MeetingRequest.self, using: MeetingRequest.decoder)
+    public static func decode(from req: Request) throws -> Future<TalkRequest> {
+        let content = try req.content.decode(json: TalkRequest.self, using: TalkRequest.decoder)
         return content
     }
 
-    public static func decode(from res: Response, for req: Request) throws -> Future<MeetingRequest> {
-        let content = try req.content.decode(json: MeetingRequest.self, using: MeetingRequest.decoder)
+    public static func decode(from res: Response, for req: Request) throws -> Future<TalkRequest> {
+        let content = try req.content.decode(json: TalkRequest.self, using: TalkRequest.decoder)
         return content
     }
 }

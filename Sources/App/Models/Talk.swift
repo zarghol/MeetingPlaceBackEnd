@@ -1,5 +1,5 @@
 //
-//  Meeting.swift
+//  Talk.swift
 //  App
 //
 //  Created by Clément NONN on 08/03/2019.
@@ -9,7 +9,7 @@ import FluentMySQL
 import Foundation
 import Vapor
 
-struct Meeting: MySQLModel {
+struct Talk: MySQLModel {
     /// The unique identifier for this `meeting`.
     var id: Int?
 
@@ -29,17 +29,17 @@ struct Meeting: MySQLModel {
         self.presenterId = presenterId
     }
 
-    var user: Parent<Meeting, User> {
+    var user: Parent<Talk, User> {
         return parent(\.presenterId)
     }
 }
 
-extension Meeting: Migration { }
+extension Talk: Migration { }
 
-extension Meeting: PublicEntityConvertible {
-    func makePublic(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicMeeting> {
+extension Talk: PublicEntityConvertible {
+    func makePublic(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicTalk> {
         return self.user.get(on: container).map {
-            return PublicMeeting(title: self.title, presentationDate: self.presentationDate, presenter: $0.username)
+            return PublicTalk(title: self.title, presentationDate: self.presentationDate, presenter: $0.username)
         }
     }
 }

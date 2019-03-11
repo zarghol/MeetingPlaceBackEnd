@@ -22,10 +22,6 @@ struct User: MySQLModel {
         self.passwordHash = passwordHash
         self.permissions = permissions
     }
-
-    var meetings: Children<User, Meeting> {
-        return children(\.presenterId)
-    }
 }
 
 extension User: PasswordAuthenticatable {
@@ -41,6 +37,10 @@ extension User: PasswordAuthenticatable {
 extension User {
     var tokens: Children<User, UserToken> {
         return children(\.userID)
+    }
+
+    var talks: Children<User, Talk> {
+        return children(\.presenterId)
     }
 }
 

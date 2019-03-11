@@ -27,19 +27,19 @@ public func routes(_ router: Router) throws {
     let tokenAuth = User.tokenAuthMiddleware()
     userRoute.grouped(tokenAuth).delete(use: userController.delete)
 
-    let unprotectedMeetingRoute = router.grouped("meeting")
+    let unprotectedTalkRoute = router.grouped("talk")
     let guardAuth = User.guardAuthMiddleware()
-    let meetingProtectedRoute = unprotectedMeetingRoute.grouped([tokenAuth, guardAuth])
+    let talkProtectedRoute = unprotectedTalkRoute.grouped([tokenAuth, guardAuth])
 
-    // Meeting routes
-    let meetingController = MeetingController()
+    // Talk routes
+    let talkController = TalkController()
 
-    meetingProtectedRoute.post(use: meetingController.create())
-    meetingProtectedRoute.put(Int.parameter, use: meetingController.edit)
-    meetingProtectedRoute.get(use: meetingController.mine)
-    meetingProtectedRoute.delete(Int.parameter, use: meetingController.delete)
+    talkProtectedRoute.post(use: talkController.create())
+    talkProtectedRoute.put(Int.parameter, use: talkController.edit)
+    talkProtectedRoute.get(use: talkController.mine)
+    talkProtectedRoute.delete(Int.parameter, use: talkController.delete)
 
-    unprotectedMeetingRoute.get("all", use: meetingController.all)
-    unprotectedMeetingRoute.get("day", String.parameter, use: meetingController.oneDay)
-    unprotectedMeetingRoute.get(Int.parameter, use: meetingController.one)
+    unprotectedTalkRoute.get("all", use: talkController.all)
+    unprotectedTalkRoute.get("day", String.parameter, use: talkController.oneDay)
+    unprotectedTalkRoute.get(Int.parameter, use: talkController.one)
 }

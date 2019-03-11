@@ -44,7 +44,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .mysql)
     migrations.add(model: UserToken.self, database: .mysql)
-    migrations.add(model: Meeting.self, database: .mysql)
+    migrations.add(model: Talk.self, database: .mysql)
     migrations.add(migration: PermissionsMigration.self, database: .mysql)
     if env == .development {
         migrations.add(migration: DevelopmentDataMigration.self, database: .mysql)

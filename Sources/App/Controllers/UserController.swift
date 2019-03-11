@@ -61,7 +61,7 @@ final class UserController {
 
         return req.transaction(on: .mysql) { conn in
             return [try user.tokens.query(on: conn).delete(),
-                    try user.meetings.query(on: conn).delete(),
+                    try user.talks.query(on: conn).delete(),
                     user.delete(on: conn)].chained()!
         }.transform(to: .ok)
     }
