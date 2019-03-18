@@ -8,7 +8,15 @@
 import Vapor
 
 struct PublicUser: Codable {
-    var username: String
+    let username: String
 }
 
 extension PublicUser: Content { }
+
+struct PublicMe: Codable {
+    let username: String
+    let isAdmin: Bool
+    let token: String
+}
+
+extension PublicMe: Content { }

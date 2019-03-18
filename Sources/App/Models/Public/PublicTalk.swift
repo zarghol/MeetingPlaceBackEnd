@@ -8,11 +8,11 @@
 import Vapor
 
 struct PublicTalk: Codable {
-    var title: String
+    let title: String
     /// The date of the meeting
-    var presentationDate: String
+    let presentationDate: String
     /// the presenter that make the show 😎
-    var presenter: String
+    let presenter: String
 }
 
 extension PublicTalk: Content { }

@@ -8,7 +8,7 @@
 import Vapor
 
 struct PublicToken: Codable {
-    var token: String
+    let token: String
 }
 
 extension PublicToken: Content { }

@@ -35,3 +35,25 @@ extension Future {
         return self.with(mapping).guard(throwing: error, condition: cond).map { $0.0 }
     }
 }
+
+extension Future {
+    func ifNotAlreadyExist<A>(container: Worker, createHandler: @escaping () -> Future<A>) -> Future<A> where T == Optional<A> {
+        return self.flatMap(to: A.self) {
+            if let res = $0 {
+                return container.future(res)
+            } else {
+                return createHandler()
+            }
+        }
+    }
+
+    func ifNotAlreadyExist<A>(createHandler: @escaping () -> A) -> Future<A> where T == Optional<A> {
+        return self.map(to: A.self) {
+            if let res = $0 {
+                return res
+            } else {
+                return createHandler()
+            }
+        }
+    }
+}

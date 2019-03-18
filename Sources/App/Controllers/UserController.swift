@@ -24,6 +24,30 @@ final class UserController {
         }
     }
 
+    // protected by token
+    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try req.requireAuthenticated(User.self)
+
+        return req.transaction(on: .mysql) { conn in
+            return [try user.authTokens.query(on: conn).delete(),
+                    try user.talks.query(on: conn).delete(),
+                    user.delete(on: conn)].chained()!
+            }.transform(to: .ok)
+    }
+
+    // not protected
+    func allUsernames(_ req: Request) -> Future<[PublicUser]> {
+        return User.query(on: req)
+            .all()
+            .makePublic(with: req)
+    }
+
+    func connect(_ req: Request) throws -> Future<PublicMe> {
+        let user = try req.requireAuthenticated(User.self)
+
+        return try user.makePublicMe(with: req)
+    }
+
     // protected by password
     func createToken(_ req: Request) throws -> Future<PublicToken> {
         let userId = try req.requestUserId()
@@ -37,7 +61,7 @@ final class UserController {
     func allTokens(_ req: Request) throws -> Future<[PublicToken]> {
         let user = try req.requireAuthenticated(User.self)
 
-        return try user.tokens
+        return try user.authTokens
             .query(on: req)
             .all()
             .makePublic(with: req)
@@ -53,23 +77,5 @@ final class UserController {
             .filter(\UserToken.userID, .equal, userId)
             .delete()
             .transform(to: .ok)
-    }
-
-    // protected by token
-    func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let user = try req.requireAuthenticated(User.self)
-
-        return req.transaction(on: .mysql) { conn in
-            return [try user.tokens.query(on: conn).delete(),
-                    try user.talks.query(on: conn).delete(),
-                    user.delete(on: conn)].chained()!
-        }.transform(to: .ok)
-    }
-
-    // not protected
-    func allUsernames(_ req: Request) -> Future<[PublicUser]> {
-        return User.query(on: req)
-            .all()
-            .makePublic(with: req)
     }
 }

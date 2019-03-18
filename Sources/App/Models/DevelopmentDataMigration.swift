@@ -27,7 +27,7 @@ struct DevelopmentDataMigration: MySQLMigration {
     static func revert(on conn: MySQLConnection) -> EventLoopFuture<Void> {
         return User.query(on: conn).filter(\User.username == "zarghol").all().map {
             try $0.forEach {
-                try $0.tokens.query(on: conn).delete().wait()
+                try $0.authTokens.query(on: conn).delete().wait()
                 try $0.delete(on: conn).wait()
 
             }

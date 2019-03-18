@@ -35,10 +35,6 @@ extension User: PasswordAuthenticatable {
 }
 
 extension User {
-    var tokens: Children<User, UserToken> {
-        return children(\.userID)
-    }
-
     var talks: Children<User, Talk> {
         return children(\.presenterId)
     }
@@ -54,5 +50,12 @@ extension User: Migration { }
 extension User: PublicEntityConvertible {
     func makePublic(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicUser> {
         return container.future(PublicUser(username: self.username)) 
+    }
+
+    func makePublicMe(with container: Container & DatabaseConnectable) throws -> EventLoopFuture<PublicMe> {
+        return try self.authTokens.query(on: container)
+            .first()
+            .ifNotAlreadyExist(container: container) { UserToken.create(forUser: self.id!).create(on: container) }
+            .map { PublicMe(username: self.username, isAdmin: self.permissions == .admin, token: $0.string) }
     }
 }

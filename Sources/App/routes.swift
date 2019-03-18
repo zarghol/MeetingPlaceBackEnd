@@ -20,6 +20,8 @@ public func routes(_ router: Router) throws {
     let basicAuth = User.basicAuthMiddleware(using: BCryptDigest())
     let tokenManagementRoute = userRoute.grouped("token").grouped(basicAuth)
 
+    userRoute.grouped(basicAuth).get("connect", use: userController.connect)
+
     tokenManagementRoute.post(use: userController.createToken)
     tokenManagementRoute.get(use: userController.allTokens)
     tokenManagementRoute.delete(String.parameter, use: userController.deleteToken)

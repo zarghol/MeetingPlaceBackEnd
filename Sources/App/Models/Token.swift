@@ -24,10 +24,6 @@ struct UserToken: MySQLModel {
         let token = UUID().uuidString
         return UserToken(value: token, userId: userId)
     }
-
-    var user: Parent<UserToken, User> {
-        return parent(\.userID)
-    }
 }
 
 extension UserToken: Token {
