@@ -8,6 +8,31 @@
 import Vapor
 import Crypto
 
+enum AuthenticationError: AbortError {
+    var status: HTTPResponseStatus {
+        switch self {
+        case .badPassword:
+            return .unauthorized
+        case .unknownUser:
+            return .preconditionFailed
+        }
+    }
+
+    var reason: String {
+        switch self {
+        case .badPassword:
+            return "invalid password"
+        case .unknownUser:
+            return "unknown user"
+        }
+    }
+
+    var identifier: String { return "Authentication Error" }
+
+    case unknownUser
+    case badPassword
+}
+
 final class UserController {
     func create(_ req: Request) throws -> Future<PublicUser> {
         let userRequest = try req.content.decode(UserRequest.self)
@@ -43,9 +68,17 @@ final class UserController {
     }
 
     func connect(_ req: Request) throws -> Future<PublicMe> {
-        let user = try req.requireAuthenticated(User.self)
-
-        return try user.makePublicMe(with: req)
+        if let user = try req.authenticated(User.self) {
+            return try user.makePublicMe(with: req)
+        } else if let username = req.http.headers.basicAuthorization?.username {
+            return User.query(on: req).filter(\User.username, .equal, username).first().map(to: Bool.self) {
+                return $0 != nil
+            }.map {
+                throw $0 ? AuthenticationError.badPassword : AuthenticationError.unknownUser
+            }
+        } else {
+            throw AuthenticationError.badPassword
+        }
     }
 
     // protected by password
