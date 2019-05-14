@@ -20,6 +20,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     // middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
 //    middlewares.use(GuardAuthenticationMiddleware.self) // for all creation of meeting
     middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    middlewares.use(ConnectionCloseMiddleware())
     services.register(middlewares)
 
     guard let hostname = Environment.get("hostname"),
